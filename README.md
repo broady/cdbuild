@@ -1,10 +1,14 @@
 # cdbuild
 
-Build docker images remotely and push to gcr.io
+*Cloud Docker Build*
+
+Build docker images remotely and push to Google Cloud Container Repository (gcr.io).
 
 ## Install
 
-Install the [Cloud SDK](https://cloud.google.com/sdk/).
+First, install the [Cloud SDK](https://cloud.google.com/sdk/).
+
+Then, install `cdbuild`
 
     $ go get -u github.com/broady/cdbuild
 
@@ -20,7 +24,7 @@ Install the [Cloud SDK](https://cloud.google.com/sdk/).
 
 The image is now available at `gcr.io/$MYPROJECT/$IMAGENAME`.
 
-You can optionally add a version for the image by appending `:$VERSION`. For example:
+You can optionally add a version (Docker calls these tags) for the image by appending `:$VERSION`. For example:
 
     $ cdbuild -project $MYPROJECT -name $IMAGENAME:v1
 
