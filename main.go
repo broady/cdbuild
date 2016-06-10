@@ -41,10 +41,14 @@ func main() {
 		flag.PrintDefaults()
 	}
 	if *projectID == "" {
-		log.Fatal("Missing 'project' flag.")
+		fmt.Fprintln(os.Stderr, "Missing 'project' flag.")
+		flag.Usage()
+		os.Exit(2)
 	}
 	if *name == "" {
-		log.Fatal("Missing 'name' flag.")
+		fmt.Fprintln(os.Stderr, "Missing 'name' flag.")
+		flag.Usage()
+		os.Exit(2)
 	}
 
 	stagingBucket := "cdbuild-" + *projectID
@@ -53,8 +57,20 @@ func main() {
 	ctx := context.Background()
 	hc, err := google.DefaultClient(ctx, storage.CloudPlatformScope)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Could not get authenticated HTTP client: %v", err)
 	}
+
+	/*
+		plusClient, err := plus.New(hc)
+		if err != nil {
+			log.Fatalf("Could not get plus client: %v", err)
+		}
+		profile, err := plusClient.People.Get("me").Do()
+		if err != nil {
+			log.Fatalf("Could not get current user: %v", err)
+		}
+		log.Printf("Deploying as %v", profile.Id)
+	*/
 
 	if err := setupBucket(ctx, hc, stagingBucket); err != nil {
 		log.Fatalf("Could not set up buckets: %v", err)
@@ -68,7 +84,7 @@ func main() {
 
 	api, err := cloudbuild.New(hc)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Could not get cloudbuild client: %v", err)
 	}
 	call := api.Projects.Builds.Create(*projectID, &cloudbuild.Build{
 		LogsBucket: stagingBucket,
@@ -92,7 +108,7 @@ func main() {
 	}
 	remoteID, err := getBuildID(op)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Could not get build ID from op: %v", err)
 	}
 
 	log.Printf("Logs at https://console.cloud.google.com/m/cloudstorage/b/%s/o/log-%s.txt", stagingBucket, remoteID)
@@ -100,7 +116,7 @@ func main() {
 	for {
 		b, err := api.Projects.Builds.Get(*projectID, remoteID).Do()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Could not get build status: %v", err)
 		}
 
 		if b.Status != "WORKING" && b.Status != "QUEUED" {
@@ -111,14 +127,13 @@ func main() {
 		time.Sleep(time.Second)
 	}
 
-	log.Print("Cleaning up.")
 	c, err := cstorage.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Could not make Cloud storage client: %v", err)
 	}
 	defer c.Close()
 	if err := c.Bucket(stagingBucket).Object(buildObject).Delete(ctx); err != nil {
-		log.Fatal(err)
+		log.Fatalf("Could not delete source tar.gz: %v", err)
 	}
 	log.Print("Cleaned up.")
 }
