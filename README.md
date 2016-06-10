@@ -14,7 +14,7 @@ Then, install `cdbuild`
 
 ## Usage
 
-    $ gcloud auth login 
+    $ gcloud beta auth application-default login
 
     $ ls 
     Dockerfile
