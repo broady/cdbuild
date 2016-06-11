@@ -60,19 +60,13 @@ func main() {
 		log.Fatalf("Could not get authenticated HTTP client: %v", err)
 	}
 
-	/*
-		plusClient, err := plus.New(hc)
-		if err != nil {
-			log.Fatalf("Could not get plus client: %v", err)
-		}
-		profile, err := plusClient.People.Get("me").Do()
-		if err != nil {
-			log.Fatalf("Could not get current user: %v", err)
-		}
-		log.Printf("Deploying as %v", profile.Id)
-	*/
-
 	if err := setupBucket(ctx, hc, stagingBucket); err != nil {
+		if gerr, ok := err.(*googleapi.Error); ok {
+			if gerr.Code == 403 {
+				// HACK(cbro): storage returns a 403 if billing is not enabled.
+				log.Fatalf("Could not set up Cloud Storage bucket. It's possible billing is not enabled. Root cause: %v", err)
+			}
+		}
 		log.Fatalf("Could not set up buckets: %v", err)
 	}
 
@@ -104,7 +98,15 @@ func main() {
 	})
 	op, err := call.Context(ctx).Do()
 	if err != nil {
-		log.Fatalf("Could not create build: %v", err)
+		if gerr, ok := err.(*googleapi.Error); ok {
+			if gerr.Code == 404 {
+				// HACK(cbro): the API does not return a good error if the API is not enabled.
+				fmt.Fprintln(os.Stderr, "Could not create build. It's likely the Cloud Container Builder API is not enabled.")
+				fmt.Fprintf(os.Stderr, "Go here to enable it: https://console.cloud.google.com/apis/api/cloudbuild.googleapis.com/overview?project=%s\n", *projectID)
+				os.Exit(1)
+			}
+		}
+		log.Fatalf("Could not create build: %#v", err)
 	}
 	remoteID, err := getBuildID(op)
 	if err != nil {
