@@ -21,12 +21,12 @@ import (
 
 	"github.com/satori/go.uuid"
 
+	cstorage "cloud.google.com/go/storage"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/cloudbuild/v1"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/storage/v1"
-	cstorage "google.golang.org/cloud/storage"
 )
 
 var (
