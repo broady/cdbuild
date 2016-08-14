@@ -1,5 +1,7 @@
 # cdbuild
 
+[![Build Status](https://travis-ci.org/broady/cdbuild.svg?branch=master)](https://travis-ci.org/broady/cdbuild)
+
 *Cloud Docker Build*
 
 Build docker images remotely and push to Google Cloud Container Repository (gcr.io).
