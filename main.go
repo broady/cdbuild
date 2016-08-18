@@ -200,8 +200,12 @@ func uploadTar(ctx context.Context, hc *http.Client, bucket string, objectName s
 		if err != nil {
 			return err
 		}
+		hdr.Name = path
 		if err := tw.WriteHeader(hdr); err != nil {
 			return err
+		}
+		if info.IsDir() {
+			return nil
 		}
 		f, err := os.Open(path)
 		if err != nil {
