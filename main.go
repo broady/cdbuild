@@ -140,23 +140,15 @@ func main() {
 	log.Print("Cleaned up.")
 }
 
-// HACK: workaround for lack of type for "Metadata" field.
 func getBuildID(op *cloudbuild.Operation) (string, error) {
-	if op.Metadata == nil {
+	if len(op.Metadata) == 0 {
 		return "", errors.New("missing Metadata in operation")
 	}
-	if m, ok := op.Metadata.(map[string]interface{}); ok {
-		b, err := json.Marshal(m["build"])
-		if err != nil {
-			return "", err
-		}
-		build := &cloudbuild.Build{}
-		if err := json.Unmarshal(b, &build); err != nil {
-			return "", err
-		}
-		return build.Id, nil
+	build := &cloudbuild.Build{}
+	if err := json.Unmarshal(op.Metadata, &build); err != nil {
+		return "", err
 	}
-	return "", errors.New("unknown type for op")
+	return build.Id, nil
 }
 
 func setupBucket(ctx context.Context, hc *http.Client, bucket string) error {
