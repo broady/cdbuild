@@ -19,14 +19,14 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 
 	cstorage "cloud.google.com/go/storage"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
-	"google.golang.org/api/cloudbuild/v1"
+	cloudbuild "google.golang.org/api/cloudbuild/v1"
 	"google.golang.org/api/googleapi"
-	"google.golang.org/api/storage/v1"
+	storage "google.golang.org/api/storage/v1"
 )
 
 var (
@@ -52,7 +52,7 @@ func main() {
 	}
 
 	stagingBucket := "cdbuild-" + *projectID
-	buildObject := fmt.Sprintf("build/%s-%s.tar.gz", *name, uuid.NewV4())
+	buildObject := fmt.Sprintf("build/%s-%s.tar.gz", *name, uuid.Must(uuid.NewV4()))
 
 	ctx := context.Background()
 	hc, err := google.DefaultClient(ctx, storage.CloudPlatformScope)
