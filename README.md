@@ -1,3 +1,7 @@
+*** DEFUNCT: use `gcloud builds submit` instead ***
+
+NOTE: This repo is still serves as a useful demonstration on how to use `google.golang.org/api/cloudbuild/v1`.
+
 # cdbuild
 
 [![Build Status](https://travis-ci.org/broady/cdbuild.svg?branch=master)](https://travis-ci.org/broady/cdbuild)
